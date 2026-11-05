@@ -97,3 +97,10 @@ package.json            Development, build, seed, lint, and test scripts
 This is a fictional brand with sample catalogue content. Seeded sample reviews have `isDemo: true`, are labelled “Sample review,” and do not affect customer rating totals. Product ratings stay at zero until genuine reviews exist. Only Razorpay test keys (`rzp_test_...`) are accepted. Before production, configure and thoroughly test all provider credentials, MongoDB replica-set transactions, email, delivery, tax rules, product photography/model licensing, account recovery, and deployment cookie/CORS settings. Google login, phone OTP, customer photo uploads, and guest checkout are not configured. No cash-on-delivery or other cash-payment flow is implemented. Never accept a client-side payment success as proof of payment.
 
 No public GitHub repository or deployment URL has been configured yet. A MongoDB Atlas URI, Razorpay test credentials, Anthropic credentials, SMTP settings (if email is required), and GitHub/Vercel/Render account authorization are still needed before the real integrations and deployment can be verified.
+
+## Deployment preparation
+
+- `render.yaml` defines the free Render API service. Set its MongoDB Atlas URI and the exact deployed client origin in the Render dashboard; add Razorpay, Anthropic, and SMTP secrets there only when those integrations are enabled.
+- `vercel.json` builds the Vite client from the repository root and rewrites client-side routes to `index.html`. Set `VITE_API_URL` in Vercel to the deployed Render API origin, without a trailing slash, then redeploy.
+- The API enables credentialed CORS for `CLIENT_URL` and production cookies use `SameSite=None; Secure`. Configure the matching exact client origin before testing sign-in or checkout across the two hosts.
+- Render's free service may sleep between requests. Live provider, database transaction, and cross-domain cookie behavior still need smoke testing after credentials and account access are configured.
