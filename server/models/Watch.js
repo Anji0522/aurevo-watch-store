@@ -17,6 +17,7 @@ const watchSchema = new mongoose.Schema({
   stock: { type: Number, required: true, min: 0 },
   image: { type: String, required: true },
   model3d: { type: String, default: "" },
+  ratingTotal: { type: Number, default: 0, select: false },
   rating: { type: Number, default: 0, min: 0, max: 5 },
   reviewCount: { type: Number, default: 0, min: 0 },
   accent: { type: String, default: "#d5c6b3" },

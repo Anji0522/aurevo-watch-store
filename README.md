@@ -15,7 +15,7 @@ AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, an
 2. Run `npm install`.
 3. Copy `.env.example` to `.env`; configure `MONGODB_URI`, `JWT_SECRET` (at least 32 random characters), and `CLIENT_URL`. Add Razorpay test credentials and a webhook secret only when testing payments.
 4. Run `npm run dev`. The React app is at `http://localhost:5173` and the API at `http://localhost:5000`.
-5. Run `npm run seed` to insert or update the 12 sample watch records.
+5. Run `npm run seed` to insert or update the 12 sample watch records and clearly marked sample reviews.
 
 Without `MONGODB_URI`, the API serves the sample catalog in read-only demo mode; this does not create orders or claim successful payments.
 Without `JWT_SECRET`, auth endpoints that create or validate a session remain unavailable rather than using a fallback signing key.
@@ -31,6 +31,9 @@ Without `JWT_SECRET`, auth endpoints that create or validate a session remain un
 - `POST /api/payments/create-order` — server-priced order using MongoDB catalog values; requires authentication, CSRF token, and `Idempotency-Key`
 - `POST /api/payments/verify` — validates the checkout HMAC, fetches provider payment state, and settles payment/stock in a Mongo transaction
 - `POST /api/payments/webhook` — raw-body webhook signature verification and event idempotency
+- `GET /api/reviews/:watchId` — public reviews, sort/filter, real-customer rating distribution, demo-review labels
+- `POST /api/reviews/:watchId` — one review per user, permitted only after a paid order for that watch
+- `POST /api/reviews/:watchId/:reviewId/helpful` — one helpful vote per authenticated user
 
 Only Razorpay test-mode key IDs (`rzp_test_...`) are accepted. Amounts are calculated server-side from catalog prices with 18% GST and optional ₹499 express delivery. Payment settlement needs a MongoDB replica set (Atlas provides one); the demo catalog mode cannot create orders or payments. Never place secret keys in Vite/client variables.
 
@@ -55,4 +58,4 @@ tests/                  Node test runner and Supertest API checks
 
 ## Before launch
 
-This is a fictional brand with sample catalogue content. Demo catalog ratings are zero until genuine reviews exist. Production checkout, payment verification, account recovery, product photography/model licensing, delivery, taxes, and provider credentials must be configured and tested before taking orders. No cash-on-delivery or other cash-payment flow is implemented. Never accept a client-side payment success as proof of payment.
+This is a fictional brand with sample catalogue content. Seeded sample reviews have `isDemo: true`, are labelled “Sample review,” and do not affect customer rating totals. Product ratings stay at zero until genuine reviews exist. Production checkout, payment verification, account recovery, product photography/model licensing, delivery, taxes, and provider credentials must be configured and tested before taking orders. No cash-on-delivery or other cash-payment flow is implemented. Never accept a client-side payment success as proof of payment.

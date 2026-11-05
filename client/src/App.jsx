@@ -29,7 +29,7 @@ function ProductCard({ watch, onAdd, wished, onWish }) {
         <button className="quick-add" onClick={() => onAdd(watch)}>Add to bag <span>＋</span></button>
       </div>
       <div className="product-meta"><div><span className="product-collection">{watch.collection}</span><h3>{watch.name}</h3></div><strong>{formatPrice(watch.price)}</strong></div>
-      <div className="product-detail"><span>✦ {watch.rating.toFixed(1)} <span className="muted">({watch.reviewCount})</span></span><span>{watch.specs.caseSize} · {watch.specs.movement}</span></div>
+      <div className="product-detail"><span>{watch.reviewCount ? <>✦ {watch.rating.toFixed(1)} <span className="muted">({watch.reviewCount})</span></> : <span className="muted">No customer reviews yet</span>}</span><span>{watch.specs.caseSize} · {watch.specs.movement}</span></div>
     </article>
   );
 }
