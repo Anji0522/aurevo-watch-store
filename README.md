@@ -27,6 +27,18 @@ Without `JWT_SECRET`, auth endpoints that create or validate a session remain un
 
 The storefront includes shop filters/search, product detail with a procedural 3D viewer, bag, wishlist, signup/signin, profile, order history, checkout, order confirmation, and policy/contact pages. The bag and wishlist persist locally for visitors and synchronize to the account when signed in. Checkout requires an account and a connected MongoDB database; Razorpay Checkout is restricted to the selected UPI, card, net banking, wallet, or EMI method. Payment confirmation is displayed only after the server verifies the Razorpay signature and provider payment status. Set SMTP values in `.env` to send confirmation emails. An invoice PDF is available only for a server-verified paid order.
 
+## Verification
+
+```bash
+npm test
+npm run lint
+npm run format:check
+npm run build
+npm run test:e2e
+```
+
+The Playwright suite uses local API, payment, and AI mocks; it does not make real provider requests. Install the browser once with `npx playwright install chromium`. The detailed results and live-provider limitations are in [TEST_REPORT.md](./TEST_REPORT.md).
+
 ## API
 
 - `GET /api/health` — API and database/demo status
@@ -70,9 +82,18 @@ server/
   scripts/seed.js       Explicit catalog seed script
   index.js              Express API setup
 tests/                  Node test runner and Supertest API checks
+e2e/                    Mocked Playwright storefront journeys
+client/src/test/        Vitest and Testing Library setup
+client/src/**/*.test.jsx Frontend unit tests
+eslint.config.js        ESLint configuration
+playwright.config.js    Browser test configuration
+TEST_REPORT.md          Test results and unverified external integrations
+package.json            Development, build, seed, lint, and test scripts
 .env.example            Local configuration template
 ```
 
 ## Before launch
 
 This is a fictional brand with sample catalogue content. Seeded sample reviews have `isDemo: true`, are labelled “Sample review,” and do not affect customer rating totals. Product ratings stay at zero until genuine reviews exist. Only Razorpay test keys (`rzp_test_...`) are accepted. Before production, configure and thoroughly test all provider credentials, MongoDB replica-set transactions, email, delivery, tax rules, product photography/model licensing, account recovery, and deployment cookie/CORS settings. Google login, phone OTP, customer photo uploads, and guest checkout are not configured. No cash-on-delivery or other cash-payment flow is implemented. Never accept a client-side payment success as proof of payment.
+
+No public GitHub repository or deployment URL has been configured yet. A MongoDB Atlas URI, Razorpay test credentials, Anthropic credentials, SMTP settings (if email is required), and GitHub/Vercel/Render account authorization are still needed before the real integrations and deployment can be verified.
