@@ -5,9 +5,12 @@ import Order from "../models/Order.js";
 import { watches as demoWatches } from "../data/watches.js";
 
 export async function getAssistantContext(user) {
-  const liveCatalog = mongoose.connection.readyState === 1
-    ? await Watch.find({}).select("name slug collection price stock specs variants colors").lean()
-    : demoWatches;
+  const liveCatalog =
+    mongoose.connection.readyState === 1
+      ? await Watch.find({})
+          .select("name slug collection price stock specs variants colors")
+          .lean()
+      : demoWatches;
   const catalog = liveCatalog.map((watch) => ({
     name: watch.name,
     slug: watch.slug,
@@ -17,19 +20,27 @@ export async function getAssistantContext(user) {
     specs: watch.specs,
   }));
   const orders = user
-    ? await Order.find({ user: user.id }).sort({ createdAt: -1 }).limit(5).select("status statusTimeline createdAt paymentStatus").lean()
+    ? await Order.find({ user: user.id })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("status statusTimeline createdAt paymentStatus")
+        .lean()
     : [];
   return { catalog, demoMode: mongoose.connection.readyState !== 1, orders };
 }
 
 export function buildAriaSystemPrompt({ catalog, demoMode, orders }) {
   const catalogText = JSON.stringify(catalog);
-  const orderText = orders.length ? JSON.stringify(orders.map((order) => ({
-    orderId: order._id.toString(),
-    status: order.status,
-    paymentStatus: order.paymentStatus,
-    latestUpdate: order.statusTimeline.at(-1)?.note || "",
-  }))) : "No signed-in order data is available.";
+  const orderText = orders.length
+    ? JSON.stringify(
+        orders.map((order) => ({
+          orderId: order._id.toString(),
+          status: order.status,
+          paymentStatus: order.paymentStatus,
+          latestUpdate: order.statusTimeline.at(-1)?.note || "",
+        })),
+      )
+    : "No signed-in order data is available.";
   return `You are Aria, the friendly AUREVO watch guide. Be concise, warm, and transparent.
 
 SOURCE OF TRUTH:
@@ -53,6 +64,7 @@ RULES:
 }
 
 export function createAnthropicClient() {
-  if (!process.env.ANTHROPIC_API_KEY || !process.env.ANTHROPIC_MODEL) return null;
+  if (!process.env.ANTHROPIC_API_KEY || !process.env.ANTHROPIC_MODEL)
+    return null;
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }

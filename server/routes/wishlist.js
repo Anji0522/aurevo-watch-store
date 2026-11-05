@@ -10,25 +10,36 @@ router.use(requireAuth);
 
 router.get("/", async (req, res, next) => {
   try {
-    const wishlist = await Wishlist.findOne({ user: req.user.id }).populate("watches").lean();
+    const wishlist = await Wishlist.findOne({ user: req.user.id })
+      .populate("watches")
+      .lean();
     res.json({ watches: wishlist?.watches || [] });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post("/items", [
-  body("watchId").isMongoId().withMessage("Invalid watch."),
-  validateRequest,
-], async (req, res, next) => {
-  try {
-    if (!(await Watch.exists({ _id: req.body.watchId }))) throw new AppError(404, "Timepiece not found.");
-    const wishlist = await Wishlist.findOneAndUpdate(
-      { user: req.user.id },
-      { $addToSet: { watches: req.body.watchId }, $setOnInsert: { user: req.user.id } },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    ).populate("watches");
-    res.json({ watches: wishlist.watches });
-  } catch (error) { next(error); }
-});
+router.post(
+  "/items",
+  [body("watchId").isMongoId().withMessage("Invalid watch."), validateRequest],
+  async (req, res, next) => {
+    try {
+      if (!(await Watch.exists({ _id: req.body.watchId })))
+        throw new AppError(404, "Timepiece not found.");
+      const wishlist = await Wishlist.findOneAndUpdate(
+        { user: req.user.id },
+        {
+          $addToSet: { watches: req.body.watchId },
+          $setOnInsert: { user: req.user.id },
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+      ).populate("watches");
+      res.json({ watches: wishlist.watches });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.delete("/items/:watchId", async (req, res, next) => {
   try {
@@ -38,7 +49,9 @@ router.delete("/items/:watchId", async (req, res, next) => {
       { new: true },
     ).populate("watches");
     res.json({ watches: wishlist?.watches || [] });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;

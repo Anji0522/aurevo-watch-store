@@ -6,7 +6,8 @@ import "./pages.css";
 import "./theme.css";
 
 try {
-  document.documentElement.dataset.theme = localStorage.getItem("aurevo-theme") || "light";
+  document.documentElement.dataset.theme =
+    localStorage.getItem("aurevo-theme") || "light";
 } catch {
   document.documentElement.dataset.theme = "light";
 }

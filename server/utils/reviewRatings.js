@@ -23,7 +23,9 @@ export function summarizeRatingGroups(groups) {
     ratingTotal += group.total;
   }
   return {
-    average: reviewCount ? Math.round((ratingTotal / reviewCount) * 10) / 10 : 0,
+    average: reviewCount
+      ? Math.round((ratingTotal / reviewCount) * 10) / 10
+      : 0,
     total: reviewCount,
     distribution,
   };

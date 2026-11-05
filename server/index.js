@@ -22,19 +22,43 @@ const port = Number(process.env.PORT) || 5000;
 
 if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
 const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-const apiLimiter = rateLimit({ windowMs: 60_000, limit: 180, standardHeaders: "draft-8", legacyHeaders: false });
-const authLimiter = rateLimit({ windowMs: 15 * 60_000, limit: 12, standardHeaders: "draft-8", legacyHeaders: false });
+const apiLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 180,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  limit: 12,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
 
 app.use(helmet());
-app.use(cors({ origin: allowedOrigin, credentials: true, methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "X-CSRF-Token", "Idempotency-Key"] }));
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "X-CSRF-Token", "Idempotency-Key"],
+  }),
+);
 app.use(cookieParser());
 app.use("/api", apiLimiter);
-app.post("/api/payments/webhook", express.raw({ type: "application/json", limit: "100kb" }), handleRazorpayWebhook);
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json", limit: "100kb" }),
+  handleRazorpayWebhook,
+);
 app.use(express.json({ limit: "20kb" }));
 app.use(mongoSanitize());
 app.use(csrfProtection);
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "demo" });
+  res.json({
+    status: "ok",
+    database: mongoose.connection.readyState === 1 ? "connected" : "demo",
+  });
 });
 
 app.use("/api/auth/register", authLimiter);
@@ -61,9 +85,13 @@ async function start() {
       return;
     }
   } else {
-    console.warn("MONGODB_URI is not configured; catalog reads are in read-only demo mode.");
+    console.warn(
+      "MONGODB_URI is not configured; catalog reads are in read-only demo mode.",
+    );
   }
-  app.listen(port, () => console.log(`AUREVO API listening on http://localhost:${port}`));
+  app.listen(port, () =>
+    console.log(`AUREVO API listening on http://localhost:${port}`),
+  );
 }
 
 if (process.env.NODE_ENV !== "test") start();

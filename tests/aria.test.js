@@ -1,18 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
-import { buildAriaSystemPrompt, createAnthropicClient } from "../server/services/aria.js";
+import {
+  buildAriaSystemPrompt,
+  createAnthropicClient,
+} from "../server/services/aria.js";
 
 test("Aria prompt is grounded in supplied catalogue and explicit policies", () => {
   const prompt = buildAriaSystemPrompt({
-    catalog: [{ name: "Aurevo Chronos", priceINR: 48500, stock: 12, specs: { movement: "automatic" } }],
+    catalog: [
+      {
+        name: "Aurevo Chronos",
+        priceINR: 48500,
+        stock: 12,
+        specs: { movement: "automatic" },
+      },
+    ],
     demoMode: true,
     orders: [],
   });
   assert.match(prompt, /Aurevo Chronos/);
   assert.match(prompt, /48500/);
   assert.match(prompt, /DEMO DATA ONLY/);
-  assert.match(prompt, /Returns, cancellations, delivery timelines, and support contact details are not yet configured/);
+  assert.match(
+    prompt,
+    /Returns, cancellations, delivery timelines, and support contact details are not yet configured/,
+  );
   assert.match(prompt, /Never guess or extrapolate/);
   assert.match(prompt, /There is no cash payment/);
 });
@@ -21,11 +34,21 @@ test("Aria prompt limits order tracking context to the supplied signed-in orders
   const prompt = buildAriaSystemPrompt({
     catalog: [],
     demoMode: false,
-    orders: [{ _id: "order-1", status: "shipped", paymentStatus: "paid", statusTimeline: [] }],
+    orders: [
+      {
+        _id: "order-1",
+        status: "shipped",
+        paymentStatus: "paid",
+        statusTimeline: [],
+      },
+    ],
   });
   assert.match(prompt, /order-1/);
   assert.doesNotMatch(prompt, /address|pincode/i);
-  assert.match(buildAriaSystemPrompt({ catalog: [], demoMode: false, orders: [] }), /No signed-in order data is available/);
+  assert.match(
+    buildAriaSystemPrompt({ catalog: [], demoMode: false, orders: [] }),
+    /No signed-in order data is available/,
+  );
 });
 
 test("Anthropic client fails closed when credentials or model are absent", () => {

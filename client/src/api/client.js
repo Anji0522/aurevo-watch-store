@@ -5,9 +5,14 @@ let csrfTokenRequest;
 async function getCsrfToken() {
   if (csrfToken) return csrfToken;
   if (!csrfTokenRequest) {
-    csrfTokenRequest = fetch(`${apiBase}/api/auth/csrf`, { credentials: "include" })
+    csrfTokenRequest = fetch(`${apiBase}/api/auth/csrf`, {
+      credentials: "include",
+    })
       .then(async (response) => {
-        if (!response.ok) throw new Error("Could not start a secure session. Please try again.");
+        if (!response.ok)
+          throw new Error(
+            "Could not start a secure session. Please try again.",
+          );
         ({ csrfToken } = await response.json());
         return csrfToken;
       })
@@ -23,7 +28,11 @@ export async function api(path, options = {}) {
   const method = options.method || "GET";
   const headers = new Headers(options.headers || {});
   const request = { ...options, method, headers, credentials: "include" };
-  if (options.body && !(options.body instanceof FormData) && typeof options.body !== "string") {
+  if (
+    options.body &&
+    !(options.body instanceof FormData) &&
+    typeof options.body !== "string"
+  ) {
     headers.set("Content-Type", "application/json");
     request.body = JSON.stringify(options.body);
   }
@@ -32,13 +41,16 @@ export async function api(path, options = {}) {
   }
 
   const response = await fetch(`${apiBase}/api${path}`, request);
-  const payload = response.status === 204 ? null : await response.json().catch(() => null);
+  const payload =
+    response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     if (response.status === 403 && /csrf/i.test(payload?.error || "")) {
       csrfToken = undefined;
       csrfTokenRequest = undefined;
     }
-    const error = new Error(payload?.error || "The request could not be completed.");
+    const error = new Error(
+      payload?.error || "The request could not be completed.",
+    );
     error.status = response.status;
     throw error;
   }

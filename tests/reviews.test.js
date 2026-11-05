@@ -28,7 +28,11 @@ test("rating summary returns zero counts before real customer reviews", () => {
 
 test("sample review seed records are explicitly labelled demo content", () => {
   assert.ok(sampleReviews.length > 0);
-  assert.ok(sampleReviews.every((review) => review.text.startsWith("Sample review for layout testing:")));
+  assert.ok(
+    sampleReviews.every((review) =>
+      review.text.startsWith("Sample review for layout testing:"),
+    ),
+  );
 });
 
 test("demo review documents do not require a fictitious user account", () => {

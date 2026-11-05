@@ -2,13 +2,23 @@ import nodemailer from "nodemailer";
 import Order from "../models/Order.js";
 
 export function isEmailConfigured() {
-  return Boolean(process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_FROM);
+  return Boolean(
+    process.env.EMAIL_HOST &&
+    process.env.EMAIL_USER &&
+    process.env.EMAIL_PASSWORD &&
+    process.env.EMAIL_FROM,
+  );
 }
 
 export async function sendOrderConfirmation(orderId) {
   if (!isEmailConfigured()) return false;
-  const order = await Order.findById(orderId).populate("user", "email name").lean();
-  if (!order?.user?.email) throw new Error("Cannot send the order confirmation: customer email is unavailable.");
+  const order = await Order.findById(orderId)
+    .populate("user", "email name")
+    .lean();
+  if (!order?.user?.email)
+    throw new Error(
+      "Cannot send the order confirmation: customer email is unavailable.",
+    );
   const transport = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: Number(process.env.EMAIL_PORT) || 587,

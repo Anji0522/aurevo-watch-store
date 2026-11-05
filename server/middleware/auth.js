@@ -15,7 +15,10 @@ export async function requireAuth(req, _res, next) {
     req.user = user;
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
+    if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.TokenExpiredError
+    ) {
       return next(new AppError(401, "Please sign in to continue."));
     }
     next(error);
@@ -25,25 +28,35 @@ export async function requireAuth(req, _res, next) {
 export async function optionalAuth(req, _res, next) {
   try {
     const token = req.cookies?.aurevo_session;
-    if (!token || !process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) return next();
+    if (!token || !process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32)
+      return next();
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(payload.sub) || undefined;
+    req.user = (await User.findById(payload.sub)) || undefined;
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) return next();
+    if (
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.TokenExpiredError
+    )
+      return next();
     next(error);
   }
 }
 
 export function assertSessionConfig() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-    throw new AppError(503, "Authentication is not configured. Set a JWT_SECRET of at least 32 characters.");
+    throw new AppError(
+      503,
+      "Authentication is not configured. Set a JWT_SECRET of at least 32 characters.",
+    );
   }
 }
 
 export function createSessionToken(userId) {
   assertSessionConfig();
-  return jwt.sign({ sub: userId.toString() }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ sub: userId.toString() }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 }
 
 export function sessionCookieOptions() {

@@ -25,18 +25,29 @@ const palette = {
 
 function WatchModel({ watch, variant, autoRotate, reactToPointer }) {
   const group = useRef();
-  const colors = palette[variant] || { dial: watch.accent || "#36313b", strap: "#493d38" };
-  const markers = useMemo(() => Array.from({ length: 12 }, (_, index) => {
-    const angle = (index / 12) * Math.PI * 2;
-    return [Math.sin(angle) * 0.53, Math.cos(angle) * 0.53, 0.19];
-  }), []);
+  const colors = palette[variant] || {
+    dial: watch.accent || "#36313b",
+    strap: "#493d38",
+  };
+  const markers = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) => {
+        const angle = (index / 12) * Math.PI * 2;
+        return [Math.sin(angle) * 0.53, Math.cos(angle) * 0.53, 0.19];
+      }),
+    [],
+  );
 
   useFrame((state, delta) => {
     if (!group.current) return;
     if (autoRotate) group.current.rotation.y += delta * 0.16;
     if (reactToPointer) {
-      group.current.rotation.x += (-state.pointer.y * 0.12 - group.current.rotation.x) * Math.min(delta * 2, 1);
-      group.current.rotation.z += (state.pointer.x * 0.09 - group.current.rotation.z) * Math.min(delta * 2, 1);
+      group.current.rotation.x +=
+        (-state.pointer.y * 0.12 - group.current.rotation.x) *
+        Math.min(delta * 2, 1);
+      group.current.rotation.z +=
+        (state.pointer.x * 0.09 - group.current.rotation.z) *
+        Math.min(delta * 2, 1);
     }
   });
 
@@ -52,29 +63,59 @@ function WatchModel({ watch, variant, autoRotate, reactToPointer }) {
       </mesh>
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
         <cylinderGeometry args={[0.77, 0.77, 0.23, 72]} />
-        <meshStandardMaterial color="#b4a58c" metalness={0.85} roughness={0.24} />
+        <meshStandardMaterial
+          color="#b4a58c"
+          metalness={0.85}
+          roughness={0.24}
+        />
       </mesh>
       <mesh position={[0, 0, 0.13]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.69, 0.69, 0.04, 72]} />
-        <meshStandardMaterial color={colors.dial} metalness={0.25} roughness={0.35} />
+        <meshStandardMaterial
+          color={colors.dial}
+          metalness={0.25}
+          roughness={0.35}
+        />
       </mesh>
       <mesh position={[0, 0, 0.158]}>
         <torusGeometry args={[0.7, 0.025, 12, 72]} />
         <meshStandardMaterial color="#d7c9a8" metalness={0.9} roughness={0.2} />
       </mesh>
       {markers.map((position, index) => (
-        <mesh key={index} position={position} rotation={[0, 0, -(index / 12) * Math.PI * 2]}>
-          <boxGeometry args={[index % 3 === 0 ? 0.035 : 0.018, index % 3 === 0 ? 0.09 : 0.055, 0.018]} />
-          <meshStandardMaterial color="#e2c99a" metalness={0.75} roughness={0.28} />
+        <mesh
+          key={index}
+          position={position}
+          rotation={[0, 0, -(index / 12) * Math.PI * 2]}
+        >
+          <boxGeometry
+            args={[
+              index % 3 === 0 ? 0.035 : 0.018,
+              index % 3 === 0 ? 0.09 : 0.055,
+              0.018,
+            ]}
+          />
+          <meshStandardMaterial
+            color="#e2c99a"
+            metalness={0.75}
+            roughness={0.28}
+          />
         </mesh>
       ))}
       <mesh position={[0, 0.1, 0.2]} rotation={[0, 0, -0.42]}>
         <boxGeometry args={[0.038, 0.34, 0.02]} />
-        <meshStandardMaterial color="#f0e2c5" metalness={0.7} roughness={0.25} />
+        <meshStandardMaterial
+          color="#f0e2c5"
+          metalness={0.7}
+          roughness={0.25}
+        />
       </mesh>
       <mesh position={[0, -0.09, 0.22]} rotation={[0, 0, 0.15]}>
         <boxGeometry args={[0.025, 0.46, 0.018]} />
-        <meshStandardMaterial color="#f0e2c5" metalness={0.7} roughness={0.25} />
+        <meshStandardMaterial
+          color="#f0e2c5"
+          metalness={0.7}
+          roughness={0.25}
+        />
       </mesh>
       <mesh position={[0, 0, 0.23]}>
         <circleGeometry args={[0.045, 24]} />
@@ -88,23 +129,60 @@ function WatchModel({ watch, variant, autoRotate, reactToPointer }) {
   );
 }
 
-export default function WatchCanvas({ watch, variant, interactive = true, autoRotate = true, reactToPointer = interactive }) {
+export default function WatchCanvas({
+  watch,
+  variant,
+  interactive = true,
+  autoRotate = true,
+  reactToPointer = interactive,
+}) {
   return (
-    <div className="watch-canvas" role="img" aria-label={`Interactive 3D model of ${watch.name}; selected colour ${variant}`}>
+    <div
+      className="watch-canvas"
+      role="img"
+      aria-label={`Interactive 3D model of ${watch.name}; selected colour ${variant}`}
+    >
       <Canvas
         camera={{ position: [0, 0, 3.8], fov: 36 }}
         dpr={[1, 1.5]}
-        gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+        gl={{
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance",
+        }}
       >
         <color attach="background" args={["#f2efeb"]} />
         <ambientLight intensity={1.2} />
         <directionalLight position={[3, 4, 5]} intensity={3} castShadow />
-        <directionalLight position={[-3, -2, 2]} intensity={1.2} color="#cdb7a1" />
+        <directionalLight
+          position={[-3, -2, 2]}
+          intensity={1.2}
+          color="#cdb7a1"
+        />
         <Suspense fallback={null}>
-          <WatchModel watch={watch} variant={variant} autoRotate={autoRotate} reactToPointer={reactToPointer} />
-          <ContactShadows position={[0, -1.65, 0]} opacity={0.28} scale={4} blur={2.2} far={3} />
+          <WatchModel
+            watch={watch}
+            variant={variant}
+            autoRotate={autoRotate}
+            reactToPointer={reactToPointer}
+          />
+          <ContactShadows
+            position={[0, -1.65, 0]}
+            opacity={0.28}
+            scale={4}
+            blur={2.2}
+            far={3}
+          />
         </Suspense>
-        {interactive && <OrbitControls enablePan={false} minDistance={2.6} maxDistance={5} minPolarAngle={0.65} maxPolarAngle={2.5} />}
+        {interactive && (
+          <OrbitControls
+            enablePan={false}
+            minDistance={2.6}
+            maxDistance={5}
+            minPolarAngle={0.65}
+            maxPolarAngle={2.5}
+          />
+        )}
       </Canvas>
     </div>
   );

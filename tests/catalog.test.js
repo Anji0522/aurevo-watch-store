@@ -27,7 +27,10 @@ test("catalog records have unique slugs and required product details", () => {
 
 test("catalog covers the requested collections", () => {
   const actual = new Set(watches.map((watch) => watch.collection));
-  assert.deepEqual(actual, new Set(["Classic", "Sport", "Smart-Luxe", "Limited Edition"]));
+  assert.deepEqual(
+    actual,
+    new Set(["Classic", "Sport", "Smart-Luxe", "Limited Edition"]),
+  );
 });
 
 test("catalog ratings are sample metadata, not written testimonials", () => {

@@ -6,9 +6,18 @@ export function priceCheckoutItems(requestItems, catalog) {
   const byId = new Map(catalog.map((watch) => [watch._id.toString(), watch]));
   const pricedItems = requestItems.map((item) => {
     const watch = byId.get(item.watchId);
-    if (!watch) throw new AppError(400, "One or more selected watches are no longer available.");
-    const availableVariants = watch.variants?.length ? watch.variants.map((variant) => variant.name) : watch.colors;
-    if (availableVariants?.length && !availableVariants.includes(item.variant)) {
+    if (!watch)
+      throw new AppError(
+        400,
+        "One or more selected watches are no longer available.",
+      );
+    const availableVariants = watch.variants?.length
+      ? watch.variants.map((variant) => variant.name)
+      : watch.colors;
+    if (
+      availableVariants?.length &&
+      !availableVariants.includes(item.variant)
+    ) {
       throw new AppError(400, `The ${watch.name} variant is not available.`);
     }
     return {
@@ -27,13 +36,17 @@ export function priceCheckoutItems(requestItems, catalog) {
   }
   for (const [id, quantity] of quantities) {
     const watch = byId.get(id);
-    if (quantity > watch.stock) throw new AppError(409, `${watch.name} has insufficient stock.`);
+    if (quantity > watch.stock)
+      throw new AppError(409, `${watch.name} has insufficient stock.`);
   }
   return pricedItems;
 }
 
 export function calculateOrderAmounts(items, deliveryMethod = "standard") {
-  const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0,
+  );
   const gstAmount = Math.round(subtotal * GST_RATE);
   const deliveryAmount = deliveryMethod === "express" ? 499 : 0;
   return {
@@ -46,6 +59,9 @@ export function calculateOrderAmounts(items, deliveryMethod = "standard") {
 }
 
 export function toPaise(rupees) {
-  if (!Number.isSafeInteger(rupees) || rupees < 0) throw new RangeError("Amount must be a non-negative whole number of rupees.");
+  if (!Number.isSafeInteger(rupees) || rupees < 0)
+    throw new RangeError(
+      "Amount must be a non-negative whole number of rupees.",
+    );
   return rupees * 100;
 }
