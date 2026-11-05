@@ -14,6 +14,16 @@ AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, an
 - Server-side Anthropic streaming for Aria; no API key or prompt is bundled into the browser
 - PDFKit invoices and optional SMTP order-confirmation email
 
+## Screenshots
+
+These are local demo captures; they are not screenshots of a live deployment.
+
+![AUREVO desktop homepage](./screenshots/homepage.png)
+
+![AUREVO desktop shop](./screenshots/shop.png)
+
+![AUREVO mobile homepage](./screenshots/home-mobile.png)
+
 ## Local setup
 
 1. Install Node.js 20+ and MongoDB Community Server (or obtain a MongoDB Atlas URI).
@@ -26,6 +36,25 @@ Without `MONGODB_URI`, the API serves the sample catalog in read-only demo mode;
 Without `JWT_SECRET`, auth endpoints that create or validate a session remain unavailable rather than using a fallback signing key.
 
 The storefront includes shop filters/search, product detail with a procedural 3D viewer, bag, wishlist, signup/signin, profile, order history, checkout, order confirmation, and policy/contact pages. The bag and wishlist persist locally for visitors and synchronize to the account when signed in. Checkout requires an account and a connected MongoDB database; Razorpay Checkout is restricted to the selected UPI, card, net banking, wallet, or EMI method. Payment confirmation is displayed only after the server verifies the Razorpay signature and provider payment status. Set SMTP values in `.env` to send confirmation emails. An invoice PDF is available only for a server-verified paid order.
+
+## Environment variables
+
+Copy `.env.example` to `.env`; keep all real values local or in the hosting provider's secret manager. Never use Vite-prefixed variables for secrets.
+
+| Variable                                                                                 | Purpose                                                                       |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `PORT`                                                                                   | API port; Render supplies this automatically                                  |
+| `MONGODB_URI`                                                                            | MongoDB connection string (Atlas replica set required for payment settlement) |
+| `CLIENT_URL`                                                                             | Exact browser app origin allowed by the API                                   |
+| `VITE_API_URL`                                                                           | Public API origin for a separately hosted client; blank for local Vite proxy  |
+| `JWT_SECRET`                                                                             | Private session-signing key; use a random value of at least 32 characters     |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`                      | Razorpay test credentials and webhook signature secret                        |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`                                                   | Optional server-side Aria provider credentials                                |
+| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_FROM` | Optional SMTP confirmation email settings                                     |
+
+### Razorpay test payments
+
+Only `rzp_test_...` key IDs are accepted. This repository does not include merchant credentials or real payment details, and browser E2E payment results are mocked. After configuring your own Razorpay test account, use the provider's current test instruments from the [Razorpay Payments documentation](https://razorpay.com/docs/payments/)—never enter a real card or UPI ID in test instructions.
 
 ## Verification
 
@@ -73,6 +102,7 @@ client/                 React + Vite storefront
   src/App.jsx           Storefront route table and home page
   src/styles.css        Home page styles
   src/pages.css         Responsive route/page styles
+screenshots/            Local desktop and mobile demo captures
 server/
   data/watches.js       12-watch sample catalog
   models/               Watch, User, Cart, Wishlist, Order, Review, PaymentEvent schemas
@@ -89,6 +119,8 @@ eslint.config.js        ESLint configuration
 playwright.config.js    Browser test configuration
 TEST_REPORT.md          Test results and unverified external integrations
 package.json            Development, build, seed, lint, and test scripts
+render.yaml             Render API service blueprint
+vercel.json             Vite build and SPA fallback configuration
 .env.example            Local configuration template
 ```
 
