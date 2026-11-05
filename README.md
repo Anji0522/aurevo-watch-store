@@ -8,6 +8,8 @@ AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, an
 - Express + Node.js REST API
 - React 18 + Vite frontend
 - Plain JavaScript (ES modules); no TypeScript
+- Three.js + React Three Fiber + Drei procedural watch model, lazy-loaded in the hero and product detail
+- Framer Motion, GSAP/ScrollTrigger, Lenis, Lottie, and canvas-confetti for interactions and transitions
 
 ## Local setup
 
@@ -42,6 +44,7 @@ Only Razorpay test-mode key IDs (`rzp_test_...`) are accepted. Amounts are calcu
 ```text
 client/                 React + Vite storefront
   public/favicon.svg    AUREVO favicon
+  src/components/3d/    Procedural Three.js watch viewer
   src/App.jsx           Storefront and demo cart interactions
   src/styles.css        Responsive storefront styles
 server/
