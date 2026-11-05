@@ -4,6 +4,7 @@ import Order from "../models/Order.js";
 import Watch from "../models/Watch.js";
 import { AppError } from "../middleware/errors.js";
 import { getRazorpayClient } from "./razorpay.js";
+import { isEmailConfigured, sendOrderConfirmation } from "./email.js";
 
 function secureHexEqual(expected, provided) {
   if (typeof provided !== "string" || !/^[a-f0-9]+$/i.test(provided) || expected.length !== provided.length) return false;
@@ -42,6 +43,7 @@ export async function confirmCapturedPayment({ razorpayOrderId, razorpayPaymentI
 
   const session = await mongoose.startSession();
   let result;
+  let newlyPaid = false;
   try {
     await session.withTransaction(async () => {
       const order = await Order.findOne({ razorpayOrderId, ...(userId ? { user: userId } : {}) }).session(session);
@@ -72,9 +74,15 @@ export async function confirmCapturedPayment({ razorpayOrderId, razorpayPaymentI
       order.statusTimeline.push({ status: "confirmed", note: "Payment verified by Razorpay." });
       await order.save({ session });
       result = order;
+      newlyPaid = true;
     });
   } finally {
     await session.endSession();
+  }
+  if (newlyPaid && isEmailConfigured()) {
+    sendOrderConfirmation(result._id).catch((error) => {
+      console.error("Could not send the verified-order email confirmation:", error.message);
+    });
   }
   return result;
 }

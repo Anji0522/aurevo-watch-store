@@ -75,7 +75,11 @@ test("registration fails closed if no JWT signing secret is configured", async (
   assert.equal(response.status, 503);
 });
 
-test("protected account endpoints reject anonymous requests", async () => {
+test("anonymous session lookup is safe while protected account endpoints reject guests", async () => {
   const response = await request(app).get("/api/auth/me");
-  assert.equal(response.status, 401);
+  assert.equal(response.status, 200);
+  assert.equal(response.body.user, null);
+
+  const protectedResponse = await request(app).get("/api/orders");
+  assert.equal(protectedResponse.status, 401);
 });

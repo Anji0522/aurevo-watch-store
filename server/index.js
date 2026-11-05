@@ -37,7 +37,9 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "demo" });
 });
 
-app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth", authRoutes);
 app.use("/api/watches", watchRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);

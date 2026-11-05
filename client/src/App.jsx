@@ -1,6 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "framer-motion";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AriaWidget from "./components/ai/AriaWidget.jsx";
+import SessionSync from "./components/SessionSync.jsx";
+import useAurevoStore from "./store/appStore.js";
+import {
+  AuthPage, CartPage, CheckoutPage, InformationPage, NotFoundPage, OrderSuccessPage,
+  OrdersPage, ProductPage, ProfilePage, ShopPage, WishlistPage,
+} from "./pages/StorePages.jsx";
 
 const WatchCanvas = lazy(() => import("./components/3d/WatchCanvas.jsx"));
 
@@ -32,7 +39,7 @@ function watchArtwork(watch) {
 }
 
 function Logo() {
-  return <a className="brand" href="#" aria-label="Aurevo home"><span className="brand-mark">A</span><span>AUREVO</span></a>;
+  return <a className="brand" href="/" aria-label="Aurevo home"><span className="brand-mark">A</span><span>AUREVO</span></a>;
 }
 
 function WatchArt({ watch, large = false }) {
@@ -63,11 +70,12 @@ function HeroWatch({ watch, variant }) {
 }
 
 function ProductCard({ watch, onAdd, wished, onWish, onSelect }) {
+  const watchId = watch._id || watch.id;
   return (
     <motion.article className="product-card" whileHover={{ y: -4, rotateX: 1, rotateY: -1 }} transition={{ duration: 0.2 }}>
       <div className="product-visual">
         <WatchArt watch={watch} />
-        <motion.button className={`wish-button${wished ? " is-wished" : ""}`} whileTap={{ scale: 0.78 }} animate={wished ? { scale: [1, 1.35, 1] } : { scale: 1 }} onClick={() => onWish(watch.id)} aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}>{wished ? "♥" : "♡"}</motion.button>
+        <motion.button className={`wish-button${wished ? " is-wished" : ""}`} whileTap={{ scale: 0.78 }} animate={wished ? { scale: [1, 1.35, 1] } : { scale: 1 }} onClick={() => onWish(watchId)} aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}>{wished ? "♥" : "♡"}</motion.button>
         {watch.discount > 0 && <span className="discount-tag">{watch.discount}% OFF</span>}
         <motion.button className="quick-add" whileTap={{ scale: 0.98 }} onClick={() => onAdd(watch)}>Add to bag <span>＋</span></motion.button>
       </div>
@@ -123,17 +131,21 @@ function WatchDetail({ watch, onClose, onAdd }) {
   );
 }
 
-export default function App() {
+function HomePage() {
   const [products, setProducts] = useState([]);
   const [collection, setCollection] = useState("All");
   const [sort, setSort] = useState("featured");
   const [search, setSearch] = useState("");
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [selectedWatch, setSelectedWatch] = useState(null);
+  const [isDark, setIsDark] = useState(document.documentElement.dataset.theme === "dark");
+  const cart = useAurevoStore((state) => state.cart);
+  const setCart = useAurevoStore((state) => state.setCart);
+  const wishlist = useAurevoStore((state) => state.wishlist);
+  const toggleWishlist = useAurevoStore((state) => state.toggleWishlist);
+  const storeAddToCart = useAurevoStore((state) => state.addToCart);
 
   useEffect(() => {
     let active = true;
@@ -192,15 +204,16 @@ export default function App() {
   const cartTotal = useMemo(() => cart.reduce((total, item) => total + item.price * item.quantity, 0), [cart]);
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const addToCart = (watch) => {
-    setCart((items) => {
-      const existing = items.find((item) => item.id === watch.id);
-      return existing
-        ? items.map((item) => item.id === watch.id ? { ...item, quantity: item.quantity + 1 } : item)
-        : [...items, { ...watch, quantity: 1 }];
-    });
+    storeAddToCart(watch);
     setCartOpen(true);
   };
-  const toggleWish = (id) => setWishlist((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id]);
+  const toggleWish = (id) => toggleWishlist(id);
+  const toggleTheme = () => {
+    const theme = isDark ? "light" : "dark";
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("aurevo-theme", theme);
+    setIsDark(theme === "dark");
+  };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -209,10 +222,10 @@ export default function App() {
       <header className="site-header">
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">{menuOpen ? "×" : "☰"}</button>
         <nav className={`nav-links${menuOpen ? " nav-open" : ""}`} aria-label="Main navigation">
-          <a href="#collection" onClick={() => setMenuOpen(false)}>Watches</a><a href="#story" onClick={() => setMenuOpen(false)}>Our story</a><a href="#craft" onClick={() => setMenuOpen(false)}>The craft</a>
+          <a href="/shop" onClick={() => setMenuOpen(false)}>Watches</a><a href="/about" onClick={() => setMenuOpen(false)}>Our story</a><a href="/contact" onClick={() => setMenuOpen(false)}>The craft</a>
         </nav>
         <Logo />
-        <div className="header-actions"><a className="account-link" id="account" href="#newsletter">Account</a><button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`Open bag, ${cartCount} items`}>Bag <span>{cartCount.toString().padStart(2, "0")}</span></button></div>
+        <div className="header-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}>{isDark ? "☼" : "☾"}</button><a className="account-link" id="account" href="/login">Account</a><a className="account-link" href="/wishlist">Saved</a><button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`Open bag, ${cartCount} items`}>Bag <span>{cartCount.toString().padStart(2, "0")}</span></button></div>
       </header>
 
       <section className="hero">
@@ -226,7 +239,7 @@ export default function App() {
       <section className="collection-section reveal" id="collection">
         <div className="section-heading"><div><span className="eyebrow">THE AUREVO COLLECTION</span><h2>Find your <em>forever.</em></h2></div><p>Every detail considered. Every second, yours.</p></div>
         <div className="collection-toolbar"><div className="collection-tabs" role="group" aria-label="Filter by collection">{collections.map((item) => <button key={item} className={collection === item ? "active" : ""} onClick={() => setCollection(item)}>{item}</button>)}</div><div className="toolbar-right"><label className="search-box"><span>⌕</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find your timepiece" aria-label="Search watches" /></label><select value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort watches"><option value="featured">Featured</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="rating">Top rated</option></select></div></div>
-        {loadError ? <div className="empty-state" role="alert">{loadError}</div> : products.length ? <div className="product-grid">{products.map((watch) => <ProductCard key={watch.id} watch={watch} onAdd={addToCart} wished={wishlist.includes(watch.id)} onWish={toggleWish} onSelect={setSelectedWatch} />)}</div> : <div className="empty-state">No timepieces match that search. Try another name.</div>}
+        {loadError ? <div className="empty-state" role="alert">{loadError}</div> : products.length ? <div className="product-grid">{products.map((watch) => <ProductCard key={watch._id || watch.id} watch={watch} onAdd={addToCart} wished={wishlist.includes(watch._id || watch.id)} onWish={toggleWish} onSelect={setSelectedWatch} />)}</div> : <div className="empty-state">No timepieces match that search. Try another name.</div>}
         <div className="catalog-foot"><span>SHOWING {products.length.toString().padStart(2, "0")} TIMEPIECES</span><span>MADE TO MOVE WITH YOU</span></div>
       </section>
 
@@ -235,10 +248,32 @@ export default function App() {
       <section className="craft-strip" id="craft"><span>01 &nbsp; HONEST MATERIALS</span><span>02 &nbsp; INTENTIONAL DESIGN</span><span>03 &nbsp; BUILT TO BE KEPT</span><span>04 &nbsp; TIME, WELL SPENT</span></section>
       <footer id="newsletter"><div className="footer-main"><div><Logo /><p>Objects for the hours<br />that matter most.</p></div><div className="footer-links" id="contact"><a href="#collection">Shop watches</a><a href="#story">Our story</a><a href="#contact">Contact</a></div><div className="footer-news"><span className="eyebrow">A NOTE FROM AUREVO</span><p>New chapters, considered carefully. Notes from our studio, once in a while.</p><form onSubmit={(event) => event.preventDefault()}><label className="sr-only" htmlFor="email">Email address</label><input id="email" type="email" placeholder="Your email address" /><button aria-label="Subscribe">↗</button></form></div></div><div className="footer-bottom"><span>© 2025 AUREVO ATELIER</span><span>TIME, REIMAGINED.</span><span>MADE WITH INTENTION IN INDIA</span></div></footer>
 
-      {cartOpen && <motion.div className="drawer-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}><motion.aside className="cart-drawer" aria-label="Shopping bag" initial={{ x: 30 }} animate={{ x: 0 }} exit={{ x: 30 }}><div className="drawer-heading"><div><span className="eyebrow">YOUR SELECTION</span><h2>The bag <motion.em key={cartCount} initial={{ scale: 1.4 }} animate={{ scale: 1 }}>({cartCount})</motion.em></h2></div><button onClick={() => setCartOpen(false)} aria-label="Close bag">×</button></div>{cart.length ? <><div className="cart-items">{cart.map((item) => <div className="cart-item" key={item.id}><div className="cart-thumb"><img src={watchArtwork(item)} alt={`AUREVO ${item.name}`} /></div><div className="cart-item-info"><span>{item.collection}</span><strong>{item.name}</strong><span>{formatPrice(item.price)}</span><div className="quantity"><button aria-label="Decrease quantity" onClick={() => setCart((items) => items.flatMap((entry) => entry.id !== item.id ? [entry] : entry.quantity > 1 ? [{ ...entry, quantity: entry.quantity - 1 }] : []))}>−</button><span>{item.quantity}</span><button aria-label="Increase quantity" onClick={() => setCart((items) => items.map((entry) => entry.id === item.id ? { ...entry, quantity: entry.quantity + 1 } : entry))}>＋</button><button className="remove-item" onClick={() => setCart((items) => items.filter((entry) => entry.id !== item.id))}>Remove</button></div></div></div>)}</div><div className="cart-summary"><div><span>Subtotal</span><strong>{formatPrice(cartTotal)}</strong></div><p>Taxes and delivery calculated at checkout.</p><button className="button-primary checkout-button" onClick={() => window.alert("Checkout is not enabled in this demo. Configure MongoDB and a verified payment provider before accepting orders.")}>Continue to checkout <span>↗</span></button><span className="demo-notice">Secure online payments only · No cash payment options</span></div></> : <div className="cart-empty"><span>✳</span><p>Your next favorite is waiting.</p><button className="button-primary" onClick={() => setCartOpen(false)}>Explore the collection</button></div>}</motion.aside></motion.div>}
+      {cartOpen && <motion.div className="drawer-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}><motion.aside className="cart-drawer" aria-label="Shopping bag" initial={{ x: 30 }} animate={{ x: 0 }} exit={{ x: 30 }}><div className="drawer-heading"><div><span className="eyebrow">YOUR SELECTION</span><h2>The bag <motion.em key={cartCount} initial={{ scale: 1.4 }} animate={{ scale: 1 }}>({cartCount})</motion.em></h2></div><button onClick={() => setCartOpen(false)} aria-label="Close bag">×</button></div>{cart.length ? <><div className="cart-items">{cart.map((item) => <div className="cart-item" key={`${item.id}-${item.variant}`}><div className="cart-thumb"><img src={watchArtwork(item)} alt={`AUREVO ${item.name}`} /></div><div className="cart-item-info"><span>{item.collection}</span><strong>{item.name}</strong><span>{formatPrice(item.price)}</span><div className="quantity"><button aria-label="Decrease quantity" onClick={() => setCart((items) => items.flatMap((entry) => entry.id !== item.id || entry.variant !== item.variant ? [entry] : entry.quantity > 1 ? [{ ...entry, quantity: entry.quantity - 1 }] : []))}>−</button><span>{item.quantity}</span><button aria-label="Increase quantity" onClick={() => setCart((items) => items.map((entry) => entry.id === item.id && entry.variant === item.variant ? { ...entry, quantity: entry.quantity + 1 } : entry))}>＋</button><button className="remove-item" onClick={() => setCart((items) => items.filter((entry) => entry.id !== item.id || entry.variant !== item.variant))}>Remove</button></div></div></div>)}</div><div className="cart-summary"><div><span>Subtotal</span><strong>{formatPrice(cartTotal)}</strong></div><p>Taxes and delivery calculated at checkout.</p><a className="button-primary checkout-button" href="/cart">View bag & continue <span>↗</span></a><span className="demo-notice">Secure online payments only · No cash payment options</span></div></> : <div className="cart-empty"><span>✳</span><p>Your next favorite is waiting.</p><button className="button-primary" onClick={() => setCartOpen(false)}>Explore the collection</button></div>}</motion.aside></motion.div>}
       <AnimatePresence>{selectedWatch && <WatchDetail key={selectedWatch.id} watch={selectedWatch} onClose={() => setSelectedWatch(null)} onAdd={addToCart} />}</AnimatePresence>
       <AriaWidget products={products} onAdd={addToCart} />
     </main>
     </MotionConfig>
   );
+}
+
+export default function App() {
+  return <BrowserRouter><SessionSync /><Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/shop" element={<ShopPage />} />
+    <Route path="/product/:slug" element={<ProductPage />} />
+    <Route path="/cart" element={<CartPage />} />
+    <Route path="/wishlist" element={<WishlistPage />} />
+    <Route path="/checkout" element={<CheckoutPage />} />
+    <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+    <Route path="/orders" element={<OrdersPage />} />
+    <Route path="/profile" element={<ProfilePage />} />
+    <Route path="/login" element={<AuthPage />} />
+    <Route path="/signup" element={<AuthPage register />} />
+    <Route path="/about" element={<InformationPage type="about" />} />
+    <Route path="/contact" element={<InformationPage type="contact" />} />
+    <Route path="/privacy" element={<InformationPage type="privacy" />} />
+    <Route path="/terms" element={<InformationPage type="terms" />} />
+    <Route path="/refund-policy" element={<InformationPage type="refund-policy" />} />
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes></BrowserRouter>;
 }

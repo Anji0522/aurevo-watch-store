@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
+import { body } from "express-validator";
 import User from "../models/User.js";
-import { requireAuth, createSessionToken, sessionCookieOptions, assertSessionConfig } from "../middleware/auth.js";
-import { AppError } from "../middleware/errors.js";
+import { optionalAuth, requireAuth, createSessionToken, sessionCookieOptions, assertSessionConfig } from "../middleware/auth.js";
+import { AppError, validateRequest } from "../middleware/errors.js";
 import { loginValidation, registerValidation } from "../utils/validation.js";
 
 const router = Router();
@@ -51,6 +52,23 @@ router.post("/logout", (_req, res) => {
   res.status(204).end();
 });
 
-router.get("/me", requireAuth, (req, res) => res.json({ user: publicUser(req.user) }));
+router.get("/me", optionalAuth, (req, res) => res.json({ user: req.user ? publicUser(req.user) : null }));
+
+router.patch("/profile", requireAuth, [
+  body("name").trim().isLength({ min: 2, max: 100 }).withMessage("Name must be between 2 and 100 characters."),
+  body("phone").optional({ values: "falsy" }).trim().matches(/^[+0-9 ()-]{8,20}$/).withMessage("Enter a valid phone number."),
+  validateRequest,
+], async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) throw new AppError(404, "Account not found.");
+    user.name = req.body.name;
+    user.phone = req.body.phone || "";
+    await user.save();
+    res.json({ user: publicUser(user) });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

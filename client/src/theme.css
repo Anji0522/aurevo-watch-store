@@ -1,0 +1,63 @@
+:root {
+  font-family: Inter, sans-serif;
+}
+
+body {
+  font-family: Inter, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color: #f5f1ed;
+  background: #17141b;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .site-header,
+:root[data-theme="dark"] .cart-drawer,
+:root[data-theme="dark"] .detail-modal,
+:root[data-theme="dark"] .aria-panel {
+  color: var(--page-text);
+  background: var(--page-bg);
+}
+
+:root[data-theme="dark"] .story-section,
+:root[data-theme="dark"] .product-canvas,
+:root[data-theme="dark"] .detail-model {
+  background: var(--page-card);
+}
+
+:root[data-theme="dark"] .story-copy > p,
+:root[data-theme="dark"] .hero-copy > p,
+:root[data-theme="dark"] .section-heading > p,
+:root[data-theme="dark"] .product-meta strong,
+:root[data-theme="dark"] .toolbar-right select,
+:root[data-theme="dark"] .detail-copy > p {
+  color: var(--page-muted);
+}
+
+:root[data-theme="dark"] .aria-messages,
+:root[data-theme="dark"] .aria-quick-actions,
+:root[data-theme="dark"] .aria-disclaimer {
+  background: #211c27;
+  color: var(--page-text);
+}
+
+:root[data-theme="dark"] .aria-message.assistant {
+  background: #342b3d;
+  color: #f5f1ed;
+}
+
+:root[data-theme="dark"] .aria-quick-actions button {
+  background: #211c27;
+  color: #f5f1ed;
+}
+
+:root[data-theme="dark"] .cart-thumb,
+:root[data-theme="dark"] .product-visual {
+  background: var(--page-card);
+}
+
+:focus-visible {
+  outline: 2px solid #ff6b1a;
+  outline-offset: 3px;
+}

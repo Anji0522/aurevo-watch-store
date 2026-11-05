@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, param, query } from "express-validator";
 import Cart from "../models/Cart.js";
 import Watch from "../models/Watch.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -62,11 +62,15 @@ router.patch("/items/:watchId", [
   } catch (error) { next(error); }
 });
 
-router.delete("/items/:watchId", async (req, res, next) => {
+router.delete("/items/:watchId", [
+  param("watchId").isMongoId().withMessage("Invalid watch."),
+  query("variant").optional().trim().isLength({ min: 1, max: 60 }).withMessage("Invalid variant."),
+  validateRequest,
+], async (req, res, next) => {
   try {
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.json({ items: [] });
-    cart.items = cart.items.filter((item) => !item.watch.equals(req.params.watchId));
+    cart.items = cart.items.filter((item) => !item.watch.equals(req.params.watchId) || (req.query.variant && item.variant !== req.query.variant));
     await cart.save();
     res.json({ items: cart.items });
   } catch (error) { next(error); }
