@@ -11,6 +11,7 @@ import watchRoutes from "./routes/watches.js";
 import cartRoutes from "./routes/cart.js";
 import wishlistRoutes from "./routes/wishlist.js";
 import orderRoutes from "./routes/orders.js";
+import paymentRoutes, { handleRazorpayWebhook } from "./routes/payments.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
 
@@ -26,6 +27,7 @@ app.use(helmet());
 app.use(cors({ origin: allowedOrigin, credentials: true, methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "X-CSRF-Token", "Idempotency-Key"] }));
 app.use(cookieParser());
 app.use("/api", apiLimiter);
+app.post("/api/payments/webhook", express.raw({ type: "application/json", limit: "100kb" }), handleRazorpayWebhook);
 app.use(express.json({ limit: "20kb" }));
 app.use(mongoSanitize());
 app.use(csrfProtection);
@@ -38,6 +40,7 @@ app.use("/api/watches", watchRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
