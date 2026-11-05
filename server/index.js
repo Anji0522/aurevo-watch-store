@@ -13,6 +13,7 @@ import wishlistRoutes from "./routes/wishlist.js";
 import orderRoutes from "./routes/orders.js";
 import paymentRoutes, { handleRazorpayWebhook } from "./routes/payments.js";
 import reviewRoutes from "./routes/reviews.js";
+import aiRoutes from "./routes/ai.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
 
@@ -43,6 +44,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/ai", aiRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

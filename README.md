@@ -10,6 +10,7 @@ AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, an
 - Plain JavaScript (ES modules); no TypeScript
 - Three.js + React Three Fiber + Drei procedural watch model, lazy-loaded in the hero and product detail
 - Framer Motion, GSAP/ScrollTrigger, Lenis, Lottie, and canvas-confetti for interactions and transitions
+- Server-side Anthropic streaming for Aria; no API key or prompt is bundled into the browser
 
 ## Local setup
 
@@ -36,8 +37,10 @@ Without `JWT_SECRET`, auth endpoints that create or validate a session remain un
 - `GET /api/reviews/:watchId` — public reviews, sort/filter, real-customer rating distribution, demo-review labels
 - `POST /api/reviews/:watchId` — one review per user, permitted only after a paid order for that watch
 - `POST /api/reviews/:watchId/:reviewId/helpful` — one helpful vote per authenticated user
+- `POST /api/ai/chat` — rate-limited SSE chat with live catalogue/order context and safe policy bounds
 
 Only Razorpay test-mode key IDs (`rzp_test_...`) are accepted. Amounts are calculated server-side from catalog prices with 18% GST and optional ₹499 express delivery. Payment settlement needs a MongoDB replica set (Atlas provides one); the demo catalog mode cannot create orders or payments. Never place secret keys in Vite/client variables.
+Aria requires both `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`. When either is missing or the provider fails, the server streams a friendly fallback. Unknown store policies are not guessed; Aria directs visitors to Contact.
 
 ## Project layout
 
