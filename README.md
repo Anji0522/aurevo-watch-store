@@ -1,0 +1,52 @@
+# AUREVO — Time, Reimagined.
+
+AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, and Node.js. The catalog is browsable in read-only demo mode; authentication endpoints are implemented but require your own `JWT_SECRET` and a MongoDB connection. Payment and order placement are not enabled yet.
+
+## Stack
+
+- MongoDB + Mongoose for product persistence
+- Express + Node.js REST API
+- React 18 + Vite frontend
+- Plain JavaScript (ES modules); no TypeScript
+
+## Local setup
+
+1. Install Node.js 20+ and MongoDB Community Server (or obtain a MongoDB Atlas URI).
+2. Run `npm install`.
+3. Copy `.env.example` to `.env`; configure `MONGODB_URI`, `JWT_SECRET` (at least 32 random characters), and `CLIENT_URL`.
+4. Run `npm run dev`. The React app is at `http://localhost:5173` and the API at `http://localhost:5000`.
+5. Run `npm run seed` to insert or update the 12 sample watch records.
+
+Without `MONGODB_URI`, the API serves the sample catalog in read-only demo mode; this does not create orders or claim successful payments.
+Without `JWT_SECRET`, auth endpoints that create or validate a session remain unavailable rather than using a fallback signing key.
+
+## API
+
+- `GET /api/health` — API and database/demo status
+- `GET /api/watches` — browse catalog; supports collection, search, price/material/rating filters, and sorting
+- `GET /api/watches/:slug` — product detail
+- `/api/auth` — register, login, logout, current user, and CSRF token
+- `/api/cart` and `/api/wishlist` — authenticated user cart and wishlist
+- `GET /api/orders` — authenticated order history (order creation awaits verified payment phase)
+
+## Project layout
+
+```text
+client/                 React + Vite storefront
+  public/favicon.svg    AUREVO favicon
+  src/App.jsx           Storefront and demo cart interactions
+  src/styles.css        Responsive storefront styles
+server/
+  data/watches.js       12-watch sample catalog
+  models/               Watch, User, Cart, Wishlist, Order, Review schemas
+  middleware/           Auth, CSRF, validation, and centralized errors
+  routes/               Auth, catalog, cart, wishlist, and order routes
+  scripts/seed.js       Explicit catalog seed script
+  index.js              Express API setup
+tests/                  Node test runner and Supertest API checks
+.env.example            Local configuration template
+```
+
+## Before launch
+
+This is a fictional brand with sample catalogue content. Demo catalog ratings are zero until genuine reviews exist. Production checkout, payment verification, account recovery, product photography/model licensing, delivery, taxes, and provider credentials must be configured and tested before taking orders. No cash-on-delivery or other cash-payment flow is implemented. Never accept a client-side payment success as proof of payment.
