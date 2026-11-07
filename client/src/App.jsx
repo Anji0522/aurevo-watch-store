@@ -882,7 +882,9 @@ function HomePage() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      basename={import.meta.env.PROD ? import.meta.env.BASE_URL : "/"}
+    >
       <SessionSync />
       <Routes>
         <Route path="/" element={<HomePage />} />
