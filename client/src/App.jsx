@@ -329,6 +329,7 @@ function HomePage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [catalogRetry, setCatalogRetry] = useState(0);
   const [selectedWatch, setSelectedWatch] = useState(null);
   const [isDark, setIsDark] = useState(
     document.documentElement.dataset.theme === "dark",
@@ -365,7 +366,7 @@ function HomePage() {
     return () => {
       active = false;
     };
-  }, [collection, search, sort]);
+  }, [catalogRetry, collection, search, sort]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
@@ -601,6 +602,12 @@ function HomePage() {
           {loadError ? (
             <div className="empty-state" role="alert">
               {loadError}
+              <button
+                className="button-secondary"
+                onClick={() => setCatalogRetry((attempt) => attempt + 1)}
+              >
+                Try again
+              </button>
             </div>
           ) : products.length ? (
             <div className="product-grid">

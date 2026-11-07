@@ -2,6 +2,16 @@
 
 AUREVO is a JavaScript-only MERN storefront project: MongoDB, Express, React, and Node.js. The catalog is browsable in read-only demo mode. Account, order, review, and payment operations require your own MongoDB connection and provider credentials.
 
+**Live demo:** Not deployed yet. See the [local screenshots](#screenshots) below.
+
+## Features
+
+- Browse and filter a 12-watch sample catalog, including product details and a procedural 3D viewer
+- Persistent bag and wishlist, with optional account synchronization
+- Account, order, and review flows when MongoDB and a signing secret are configured
+- Secure Razorpay test-mode checkout, server-side payment verification, and PDF invoices
+- Streaming Aria assistant with a friendly fallback when provider credentials are absent
+
 ## Stack
 
 - MongoDB + Mongoose for product persistence
@@ -29,13 +39,28 @@ These are local demo captures; they are not screenshots of a live deployment.
 1. Install Node.js 20+ and MongoDB Community Server (or obtain a MongoDB Atlas URI).
 2. Run `npm install`.
 3. Copy `.env.example` to `.env`; configure `MONGODB_URI`, `JWT_SECRET` (at least 32 random characters), and `CLIENT_URL`. Set `VITE_API_URL` only when the client and API use different origins. Add Razorpay test credentials and a webhook secret only when testing payments.
-4. Run `npm run dev`. The React app is at `http://localhost:5173` and the API at `http://localhost:5000`.
+4. Run `npm run dev`. This starts both the React app at `http://localhost:5173` and the API at `http://localhost:5000`; the Vite frontend proxies `/api` requests to the API. Running `npm run client:dev` alone will leave API requests unavailable.
 5. Run `npm run seed` to insert or update the 12 sample watch records and clearly marked sample reviews.
 
 Without `MONGODB_URI`, the API serves the sample catalog in read-only demo mode; checkout is visibly disabled and cannot create orders or claim successful payments.
 Without `JWT_SECRET`, auth endpoints that create or validate a session remain unavailable rather than using a fallback signing key.
 
 The storefront includes shop filters/search, product detail with a procedural 3D viewer, bag, wishlist, signup/signin, profile, order history, checkout, order confirmation, and policy/contact pages. The bag and wishlist persist locally for visitors and synchronize to the account when signed in. Checkout requires an account and a connected MongoDB database; Razorpay Checkout is restricted to the selected UPI, card, net banking, wallet, or EMI method. Payment confirmation is displayed only after the server verifies the Razorpay signature and provider payment status. Set SMTP values in `.env` to send confirmation emails. An invoice PDF is available only for a server-verified paid order.
+
+## Usage and scripts
+
+Open `http://localhost:5173` after starting `npm run dev`. The API health check is at `http://localhost:5000/api/health`.
+
+| Command              | Purpose                                           |
+| -------------------- | ------------------------------------------------- |
+| `npm run dev`        | Start the frontend and API together               |
+| `npm start`          | Start the API                                     |
+| `npm run client:dev` | Start only Vite (requires a separate API process) |
+| `npm run seed`       | Seed the sample catalog and reviews               |
+| `npm run build`      | Build the frontend for production                 |
+| `npm test`           | Run server and client tests                       |
+| `npm run lint`       | Lint application and test code                    |
+| `npm run test:e2e`   | Run mocked Playwright journeys                    |
 
 ## Environment variables
 
@@ -136,3 +161,7 @@ No public GitHub repository or deployment URL has been configured yet. A MongoDB
 - `vercel.json` builds the Vite client from the repository root and rewrites client-side routes to `index.html`. Set `VITE_API_URL` in Vercel to the deployed Render API origin, without a trailing slash, then redeploy.
 - The API enables credentialed CORS for `CLIENT_URL` and production cookies use `SameSite=None; Secure`. Configure the matching exact client origin before testing sign-in or checkout across the two hosts.
 - Render's free service may sleep between requests. Live provider, database transaction, and cross-domain cookie behavior still need smoke testing after credentials and account access are configured.
+
+## License
+
+No license file is currently provided. Obtain permission from the copyright holder before reusing or distributing this project.
