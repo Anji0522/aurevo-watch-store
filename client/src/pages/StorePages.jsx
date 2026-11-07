@@ -84,7 +84,7 @@ function CatalogCard({ watch }) {
     ? watch.image
     : watch.image?.startsWith("photo-")
       ? `https://images.unsplash.com/${watch.image}?auto=format&fit=crop&w=900&q=82`
-      : "/images/watch-placeholder.svg";
+      : `${import.meta.env.BASE_URL}images/watch-placeholder.svg`;
   return (
     <article className="route-product-card">
       <Link to={`/product/${watch.slug}`} className="route-product-art">
@@ -94,7 +94,7 @@ function CatalogCard({ watch }) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={(event) => {
-            event.currentTarget.src = "/images/watch-placeholder.svg";
+            event.currentTarget.src = `${import.meta.env.BASE_URL}images/watch-placeholder.svg`;
           }}
         />
       </Link>
@@ -719,7 +719,7 @@ export function CartPage() {
                     src={
                       item.image?.startsWith("photo-")
                         ? `https://images.unsplash.com/${item.image}?auto=format&fit=crop&w=300&q=75`
-                        : "/images/watch-placeholder.svg"
+                        : `${import.meta.env.BASE_URL}images/watch-placeholder.svg`
                     }
                     alt={`${item.name} watch`}
                   />
