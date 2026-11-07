@@ -1,3 +1,5 @@
+import { getDemoCatalog } from "./demoCatalog.js";
+
 const apiBase = import.meta.env.VITE_API_URL || "";
 let csrfToken;
 let csrfTokenRequest;
@@ -41,6 +43,16 @@ export async function api(path, options = {}) {
   }
 
   const response = await fetch(`${apiBase}/api${path}`, request);
+  if (
+    !response.ok &&
+    method.toUpperCase() === "GET" &&
+    import.meta.env.PROD &&
+    import.meta.env.BASE_URL !== "/" &&
+    response.headers.get("content-type")?.includes("text/html")
+  ) {
+    const demoCatalog = getDemoCatalog(path);
+    if (demoCatalog !== undefined) return demoCatalog;
+  }
   const payload =
     response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {

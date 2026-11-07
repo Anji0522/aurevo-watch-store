@@ -6,6 +6,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { api } from "./api/client.js";
 import AriaWidget from "./components/ai/AriaWidget.jsx";
 import SessionSync from "./components/SessionSync.jsx";
 import useAurevoStore from "./store/appStore.js";
@@ -346,11 +347,7 @@ function HomePage() {
     if (collection !== "All") params.set("collection", collection);
     if (search.trim()) params.set("search", search.trim());
     if (sort !== "featured") params.set("sort", sort);
-    fetch(`/api/watches?${params}`)
-      .then((response) => {
-        if (!response.ok) throw new Error("Could not load the collection.");
-        return response.json();
-      })
+    api(`/watches?${params}`)
       .then((items) => {
         if (active) {
           setProducts(items);

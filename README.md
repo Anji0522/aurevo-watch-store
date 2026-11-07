@@ -105,13 +105,13 @@ dist/                    Generated frontend build (not committed)
 
 ## Deployment notes
 
-The live frontend is deployed on GitHub Pages. Vite's `base` is configured for `/aurevo-watch-store/`; `npm run deploy` builds the site, adds an SPA fallback page, and publishes `dist`.
+The live frontend is deployed on GitHub Pages. Vite's `base` is configured for `/aurevo-watch-store/`; `npm run deploy` builds the site, adds an SPA fallback page, and publishes `dist`. When the API is unavailable on this static host, the public catalog falls back to the bundled sample watches in read-only mode.
 
 GitHub Pages hosts static files only. API-dependent features require a separately deployed Express API and a MongoDB connection. For a separate frontend/API deployment, configure `VITE_API_URL` to the API's public origin and set `CLIENT_URL` to the exact frontend origin on the API. The repository also contains `render.yaml` for the API and `vercel.json` for a Vite deployment. No live database, payment, email, or AI provider credentials are included.
 
 ## Troubleshooting
 
-**“The request could not be completed.”** This is the API client's generic message when an API request fails and the response does not contain a usable JSON error. The underlying cause is usually that the request reached a static frontend host, or that the Express API is not running/reachable; the catalog and account endpoints are served by Express, not Vite or GitHub Pages. Run `npm run dev` locally to start both services, or deploy the API and set `VITE_API_URL` and `CLIENT_URL` for the separate hosts. The home page also displays a retry action when its catalog request fails.
+**“The request could not be completed.”** This is the API client's generic message when an API request fails and the response does not contain a usable JSON error. The underlying cause is usually that the request reached a static frontend host, or that the Express API is not running/reachable. The GitHub Pages build falls back to the bundled read-only sample catalog when its API request reaches the static host; account, payment, review, and other API-backed operations still require Express. Run `npm run dev` locally to start both services, or deploy the API and set `VITE_API_URL` and `CLIENT_URL` for the separate hosts.
 
 **A direct route refresh returns a not-found page.** Deploy with `npm run deploy`; it publishes `dist/index.html` as `404.html` so GitHub Pages can load the client-side routes.
 
