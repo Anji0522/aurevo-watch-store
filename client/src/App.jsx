@@ -5,7 +5,7 @@ import {
   MotionConfig,
   useReducedMotion,
 } from "framer-motion";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import AriaWidget from "./components/ai/AriaWidget.jsx";
 import SessionSync from "./components/SessionSync.jsx";
 import useAurevoStore from "./store/appStore.js";
@@ -78,10 +78,10 @@ function watchArtwork(watch) {
 
 function Logo() {
   return (
-    <a className="brand" href="/" aria-label="Aurevo home">
+    <Link className="brand" to="/" aria-label="Aurevo home">
       <span className="brand-mark">A</span>
       <span>AUREVO</span>
-    </a>
+    </Link>
   );
 }
 
@@ -458,15 +458,15 @@ function HomePage() {
             className={`nav-links${menuOpen ? " nav-open" : ""}`}
             aria-label="Main navigation"
           >
-            <a href="/shop" onClick={() => setMenuOpen(false)}>
+            <Link to="/shop" onClick={() => setMenuOpen(false)}>
               Watches
-            </a>
-            <a href="/about" onClick={() => setMenuOpen(false)}>
+            </Link>
+            <Link to="/about" onClick={() => setMenuOpen(false)}>
               Our story
-            </a>
-            <a href="/contact" onClick={() => setMenuOpen(false)}>
+            </Link>
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>
               The craft
-            </a>
+            </Link>
           </nav>
           <Logo />
           <div className="header-actions">
@@ -477,12 +477,12 @@ function HomePage() {
             >
               {isDark ? "☼" : "☾"}
             </button>
-            <a className="account-link" id="account" href="/login">
+            <Link className="account-link" id="account" to="/login">
               Account
-            </a>
-            <a className="account-link" href="/wishlist">
+            </Link>
+            <Link className="account-link" to="/wishlist">
               Saved
-            </a>
+            </Link>
             <button
               className="bag-button"
               onClick={() => setCartOpen(true)}
@@ -841,9 +841,9 @@ function HomePage() {
                       <strong>{formatPrice(cartTotal)}</strong>
                     </div>
                     <p>Taxes and delivery calculated at checkout.</p>
-                    <a className="button-primary checkout-button" href="/cart">
+                    <Link className="button-primary checkout-button" to="/cart">
                       View bag & continue <span>↗</span>
-                    </a>
+                    </Link>
                     <span className="demo-notice">
                       Secure online payments only · No cash payment options
                     </span>
